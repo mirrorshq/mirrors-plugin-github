@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin id="kernel">
+  <mirror-site id="kernel">
+    <name>Linux Kernel Release</name>
+    <storage>file</storage>
+    <advertiser>
+      <interface>file:http</interface>
+      <interface>file:ftp</interface>
+    </advertiser>
+    <initializer>
+      <executable>updater.py</executable>
+    </initializer>
+    <updater>
+      <executable>updater.py</executable>
+      <cron-expression>0 0 * * 0</cron-expression>
+    </updater>
+  </mirror-site>
+</plugin>
