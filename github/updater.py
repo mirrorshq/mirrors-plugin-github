@@ -29,7 +29,8 @@ def main():
     else:
         raise Exception("no user information or api-token in config")
 
-    # update repositories
+    # prepare repoSet
+    repoSet = set()
     if "repositories" in cfg:
         # validation
         for item in cfg["repositories"]:
@@ -37,7 +38,6 @@ def main():
                 raise Exception("invalid repository %s" % (item))
 
         # get repoSet
-        repoSet = set()
         for item in cfg["repositories"]:
             user = item.split("/")[0]
             repo = item.split("/")[1]
@@ -56,19 +56,55 @@ def main():
                 repoSet.add(item)
                 print("Repository %s is added into prepare list." % (item))
 
-        # update
-        i = 1
-        for repo in repoSet:
-            print("Updating repository %s: (%d of %d)" % (repo, i, len(repoSet)))
-            localDir = os.path.join(dataDir, repo)
-            try:
-                _Util.gitBarePullOrClone(localDir, "https://github.com/%s" % (repo))
-            except Exception:
-                traceback.print_exc()
-            i += 1
+    # update repoSet
+    i = 1
+    for repo in repoSet:
+        print("Updating repository %s: (%d of %d)" % (repo, i, len(repoSet)))
+        localDir = os.path.join(dataDir, repo)
+        try:
+            _Util.gitBarePullOrClone(localDir, "https://github.com/%s" % (repo))
+        except Exception:
+            traceback.print_exc()
+        i += 1
+
+    # delete redundant
+    for fbasename in _Util.getFileList(dataDir, 2, "d"):
+        if fbasename not in repoSet:
+            _Util.forceDelete(os.path.join(dataDir, fbasename))
+    for fbasename in _Util.getFileList(dataDir, 1, "d"):
+        _Util.removeEmptyDir(os.path.join(dataDir, fbasename))
 
 
 class _Util:
+
+    @staticmethod
+    def removeEmptyDir(dirname):
+        if len(os.listdir(dirname)) == 0:
+            os.rmdir(dirname)
+
+    @staticmethod
+    def getFileList(dirName, level, typeList):
+        """typeList is a string, value range is "d,f,l,a"
+           returns basename"""
+
+        ret = []
+        for fbasename in os.listdir(dirName):
+            fname = os.path.join(dirName, fbasename)
+
+            if os.path.isdir(fname) and level - 1 > 0:
+                for i in _Util.getFileList(fname, level - 1, typeList):
+                    ret.append(os.path.join(fbasename, i))
+                continue
+
+            appended = False
+            if not appended and ("a" in typeList or "d" in typeList) and os.path.isdir(fname):         # directory
+                ret.append(fbasename)
+            if not appended and ("a" in typeList or "f" in typeList) and os.path.isfile(fname):        # file
+                ret.append(fbasename)
+            if not appended and ("a" in typeList or "l" in typeList) and os.path.islink(fname):        # soft-link
+                ret.append(fbasename)
+
+        return ret
 
     @staticmethod
     def forceDelete(path):
