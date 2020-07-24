@@ -4,6 +4,7 @@
 import re
 import sys
 import json
+import github
 import urllib
 import urllib.request
 import certifi
@@ -12,24 +13,24 @@ import subprocess
 
 
 def main():
-    url = "https://www.kernel.org"
-    rsyncSource = "rsync://rsync.kernel.org/pub"
+    url = "https://www.github.org"
+    rsyncSource = "rsync://rsync.github.org/pub"
 
     cfg = json.loads(sys.argv[1])["config"]
     dataDir = json.loads(sys.argv[1])["storage-file"]["data-directory"]
 
-    mode = cfg.get("mode", "recent-kernel-only")
+    mode = cfg.get("mode", "recent-github-only")
     if mode == "full":
         patternList = []
-    elif mode == "kernel-only":
+    elif mode == "github-only":
         patternList = [
             "+ /linux",
-            "+ /linux/kernel",
-            "+ /linux/kernel/v*",
-            "+ /linux/kernel/v*/***",
+            "+ /linux/github",
+            "+ /linux/github/v*",
+            "+ /linux/github/v*/***",
             "- /**",
         ]
-    elif mode == "recent-kernel-only":
+    elif mode == "recent-github-only":
         mainVerSet = set()
         if True:
             resp = urllib.request.urlopen(url, timeout=60, cafile=certifi.where())
@@ -42,12 +43,12 @@ def main():
 
         patternList = [
             "+ /linux",
-            "+ /linux/kernel",
+            "+ /linux/github",
         ]
         for v in mainVerSet:
             patternList += [
-                "+ /linux/kernel/v%s.*" % (v),
-                "+ /linux/kernel/v%s.*/***" % (v),
+                "+ /linux/github/v%s.*" % (v),
+                "+ /linux/github/v%s.*/***" % (v),
             ]
         patternList.append("- /**")
     else:

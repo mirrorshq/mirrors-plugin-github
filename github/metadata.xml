@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<plugin id="kernel">
-  <mirror-site id="kernel">
-    <name>Linux Kernel Release</name>
-    <storage>file</storage>
+<plugin id="github">
+  <mirror-site id="github">
+    <name>Github</name>
+    <storage>git</storage>
     <advertiser>
-      <interface>file:http</interface>
-      <interface>file:ftp</interface>
+      <interface>git:http</interface>
     </advertiser>
     <initializer>
       <executable>updater.py</executable>
