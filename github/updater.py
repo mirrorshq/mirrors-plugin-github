@@ -21,12 +21,18 @@ def main():
     # check configuration
     if "account" not in cfg:
         raise Exception("no \"account\" in config")
+    if "username" in cfg["account"] and "password" in cfg["account"]:
+        pass
+    elif "access-token" in cfg["account"]:
+        pass
+    else:
+        raise Exception("no user information or api-token in config")
 
     # update repositories
     if "repositories" in cfg:
         # validation
         for item in cfg["repositories"]:
-            if item.split("/") != 2:
+            if len(item.split("/")) != 2:
                 raise Exception("invalid repository %s" % (item))
 
         # get repoSet
@@ -34,11 +40,17 @@ def main():
         for item in cfg["repositories"]:
             user = item.split("/")[0]
             repo = item.split("/")[1]
+            print(user, repo)
             if repo == "*":
                 if gObj is None:
-                    gObj = github.Github(cfg["account"]["username"], cfg["account"]["password"])
-                tlist = gObj.get_user(user).get_repo("all")
-                tlist = [str(x) for x in tlist if str(x).split("/")[0] == user]
+                    if "access-token" in cfg["account"]:
+                        gObj = github.Github(cfg["account"]["access-token"])
+                    else:
+                        gObj = github.Github(cfg["account"]["username"], cfg["account"]["password"])
+                tlist = gObj.get_user(user).get_repos()
+                print("1 " + tlist)
+                tlist = [x.name for x in tlist if x.name.split("/")[0] == user]
+                print("2 " + tlist)
                 for t in tlist:
                     repoSet.add(t)
             else:
