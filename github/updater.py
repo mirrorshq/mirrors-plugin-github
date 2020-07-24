@@ -48,9 +48,8 @@ def main():
                     else:
                         gObj = github.Github(cfg["account"]["username"], cfg["account"]["password"])
                 tlist = gObj.get_user(user).get_repos()
-                print("1 " + tlist)
-                tlist = [x.name for x in tlist if x.name.split("/")[0] == user]
-                print("2 " + tlist)
+                tlist = [x.full_name for x in tlist]
+                tlist = [x for x in tlist if x.split("/")[0] == user]
                 for t in tlist:
                     repoSet.add(t)
             else:
@@ -62,7 +61,7 @@ def main():
             print("Updating repository %s: (%d of %d)" % (repo, i, len(repoSet)))
             localDir = os.path.join(dataDir, repo)
             try:
-                _Util.gitPullOrClone(localDir, "https://github.com/%s" % (repo))
+                _Util.gitBarePullOrClone(localDir, "https://github.com/%s" % (repo))
             except Exception:
                 traceback.print_exc()
             i += 1
@@ -183,8 +182,10 @@ class _Util:
             return "Command '%s' stucked for %d seconds." % (self.cmd, self.timeout)
 
     @staticmethod
-    def gitIsRepo(dirName):
-        return os.path.isdir(os.path.join(dirName, ".git"))
+    def gitIsBareRepo(dirName):
+        # return os.path.isdir(os.path.join(dirName, ".git"))
+        # Open the config file in the .get directory and look for bare = true.
+        return True
 
     @staticmethod
     def gitGetUrl(dirName):
@@ -196,23 +197,14 @@ class _Util:
         _Util.cmdCall("/usr/bin/git", "-C", dirName, "clean", "-xfd")    # delete untracked files
 
     @staticmethod
-    def gitPullOrClone(dirName, url, shallow=False, quiet=False):
+    def gitBarePullOrClone(dirName, url):
         """pull is the default action
            clone if not exists
+           clone if not bare
            clone if url differs
            clone if pull fails"""
 
-        if shallow:
-            depth = "--depth 1"
-        else:
-            depth = ""
-
-        if quiet:
-            quiet = "-q"
-        else:
-            quiet = ""
-
-        if os.path.exists(dirName) and url == _Util.gitGetUrl(dirName):
+        if os.path.exists(dirName) and _Util.gitIsBareRepo(dirName) and url == _Util.gitGetUrl(dirName):
             mode = "pull"
         else:
             mode = "clone"
@@ -221,8 +213,8 @@ class _Util:
             if mode == "pull":
                 _Util.gitClean(dirName)
                 try:
-                    cmd = "%s /usr/bin/git -C \"%s\" pull --rebase --no-stat %s %s" % (_Util._getGitSpeedEnv(), dirName, depth, quiet)
-                    _Util.shellExecWithStuckCheck(cmd, quiet=quiet)
+                    cmd = "%s /usr/bin/git -C \"%s\" fetch --rebase --no-stat" % (_Util._getGitSpeedEnv(), dirName)
+                    _Util.shellExecWithStuckCheck(cmd)
                     break
                 except _Util.ProcessStuckError:
                     time.sleep(1.0)
@@ -235,8 +227,8 @@ class _Util:
             elif mode == "clone":
                 _Util.forceDelete(dirName)
                 try:
-                    cmd = "%s /usr/bin/git clone %s %s \"%s\" \"%s\"" % (_Util._getGitSpeedEnv(), depth, quiet, url, dirName)
-                    _Util.shellExecWithStuckCheck(cmd, quiet=quiet)
+                    cmd = "%s /usr/bin/git clone --bare \"%s\" \"%s\"" % (_Util._getGitSpeedEnv(), url, dirName)
+                    _Util.shellExecWithStuckCheck(cmd)
                     break
                 except subprocess.CalledProcessError as e:
                     if e.returncode > 128:
