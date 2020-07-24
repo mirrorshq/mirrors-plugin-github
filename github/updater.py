@@ -8,6 +8,7 @@ import time
 import shutil
 import github
 import selectors
+import traceback
 import subprocess
 
 
@@ -44,9 +45,15 @@ def main():
                 repoSet.add(item)
 
         # update
+        i = 1
         for repo in repoSet:
+            print("Updating repository %s: (%d of %d)" % (repo, i, len(repoSet)))
             localDir = os.path.join(dataDir, repo)
-            _Util.gitPullOrClone(localDir, "https://github.com/%s" % (repo))
+            try:
+                _Util.gitPullOrClone(localDir, "https://github.com/%s" % (repo))
+            except Exception:
+                traceback.print_exc()
+            i += 1
 
 
 class _Util:
