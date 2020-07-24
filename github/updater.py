@@ -2,6 +2,7 @@
 # -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 
 import os
+import re
 import sys
 import json
 import time
@@ -40,20 +41,20 @@ def main():
         for item in cfg["repositories"]:
             user = item.split("/")[0]
             repo = item.split("/")[1]
-            print(user, repo)
             if repo == "*":
+                print("Process wildcard %s." % (item))
                 if gObj is None:
                     if "access-token" in cfg["account"]:
                         gObj = github.Github(cfg["account"]["access-token"])
                     else:
                         gObj = github.Github(cfg["account"]["username"], cfg["account"]["password"])
-                tlist = gObj.get_user(user).get_repos()
-                tlist = [x.full_name for x in tlist]
-                tlist = [x for x in tlist if x.split("/")[0] == user]
-                for t in tlist:
-                    repoSet.add(t)
+                for tobj in gObj.get_user(user).get_repos():
+                    if tobj.full_name.split("/")[0] == user:
+                        repoSet.add(tobj.full_name)
+                        print("Repository %s is added into prepare list." % (tobj.full_name))
             else:
                 repoSet.add(item)
+                print("Repository %s is added into prepare list." % (item))
 
         # update
         i = 1
@@ -183,8 +184,12 @@ class _Util:
 
     @staticmethod
     def gitIsBareRepo(dirName):
-        # return os.path.isdir(os.path.join(dirName, ".git"))
-        # Open the config file in the .get directory and look for bare = true.
+        if os.path.isdir(os.path.join(dirName, ".git")):
+            return False
+        if not os.path.exists(os.path.join(dirName, "config")):
+            return False
+        if re.search("^\\s*bare\\s*=\\s*true\\s*$", _Util.readFile(os.path.join(dirName, "config")), re.M) is None:
+            return False
         return True
 
     @staticmethod
