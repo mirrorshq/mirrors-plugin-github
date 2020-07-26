@@ -280,6 +280,8 @@ class _Util:
                     if e.returncode > 128:
                         raise                    # terminated by signal, no retry needed
                     time.sleep(1.0)
+                    if "fatal: could not read Username" in str(e.stderr):
+                        raise                    # github repository may be unavailable for various reasons, no retry needed
             else:
                 assert False
 
