@@ -78,6 +78,11 @@ def main():
 class _Util:
 
     @staticmethod
+    def readFile(filename):
+        with open(filename) as f:
+            return f.read()
+
+    @staticmethod
     def removeEmptyDir(dirname):
         if len(os.listdir(dirname)) == 0:
             os.rmdir(dirname)
