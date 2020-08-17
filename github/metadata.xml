@@ -2,7 +2,7 @@
 <plugin id="github">
   <mirror-site id="github">
     <name>Github</name>
-    <storage>git</storage>
+    <storage type="git"></storage>
     <advertiser>
       <interface>git:http</interface>
     </advertiser>
