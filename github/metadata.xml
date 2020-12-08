@@ -2,10 +2,8 @@
 <plugin id="github">
   <mirror-site id="github">
     <name>Github</name>
-    <storage type="git"></storage>
-    <advertiser>
-      <interface>git:http</interface>
-    </advertiser>
+    <storage type="file"/>
+    <advertiser type="git"/>
     <initializer>
       <executable>updater.py</executable>
     </initializer>
