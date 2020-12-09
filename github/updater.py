@@ -15,7 +15,7 @@ import subprocess
 
 def main():
     cfg = json.loads(sys.argv[1])["config"]
-    dataDir = json.loads(sys.argv[1])["storage-git"]["data-directory"]
+    dataDir = json.loads(sys.argv[1])["storage-file"]["data-directory"]
 
     gObj = None
 
