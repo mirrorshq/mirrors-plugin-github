@@ -4,6 +4,7 @@
     <name>Github</name>
     <storage type="file"/>
     <advertiser type="git"/>
+    <advertiser type="klaus"/>
     <initializer>
       <executable>updater.py</executable>
     </initializer>
