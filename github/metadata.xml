@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<plugin id="github">
-  <mirror-site id="github">
-    <name>Github</name>
-    <storage type="file"/>
-    <advertiser type="git"/>
-    <advertiser type="klaus"/>
-    <initializer>
-      <executable>updater.py</executable>
-    </initializer>
-    <updater>
-      <executable>updater.py</executable>
-      <schedule type="interval">1d</schedule>
-    </updater>
-  </mirror-site>
-</plugin>
+<mirror-site id="github">
+  <name>Github</name>
+  <storage type="file"/>
+  <advertiser type="git"/>
+  <advertiser type="klaus"/>
+  <initializer>
+    <executable>updater.py</executable>
+  </initializer>
+  <updater>
+    <executable>updater.py</executable>
+    <schedule type="interval">1d</schedule>
+  </updater>
+</mirror-site>
