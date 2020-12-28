@@ -4,18 +4,18 @@
 import os
 import re
 import sys
-import json
 import time
 import shutil
 import github
 import selectors
 import traceback
 import subprocess
+import mirrors.plugin
 
 
 def main():
-    cfg = json.loads(sys.argv[1])["config"]
-    dataDir = json.loads(sys.argv[1])["storage-file"]["data-directory"]
+    cfg = mirrors.plugin.params["config"]
+    dataDir = mirrors.plugin.params["storage-file"]["data-directory"]
 
     gObj = None
 
